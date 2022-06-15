@@ -1,0 +1,653 @@
+library(data.table)
+library(ggplot2)
+library(forecast)
+library(data.table)
+library(lubridate)
+library(zoo)  
+library(tidyr)
+library(tseries)
+library(base)
+
+# Define server logic required to draw autoplot
+shinyServer(function(input, output){
+  
+  #####################################################################
+  #Reading Data
+  
+  #German
+  de_all_access_all_agents = fread("de_all_access_all_agents.csv")
+  de_desktop_all_agents = fread("de_desktop_all_agents.csv")
+  de_all_access_spider = fread("de_all_access_spider.csv")
+  de_desktop_spider =fread("de_desktop_spider.csv")
+  de_mobile_web_all_agents= fread("de_mobile_web_all_agents.csv")
+  de_mobile_web_spider= fread("de_mobile_web_spider.csv")
+  #English
+  en_all_access_all_agents= fread("en_all_access_all_agents.csv")
+  en_all_access_spider= fread("en_all_access_spider.csv")
+  en_desktop_all_agents= fread("en_desktop_all_agents.csv")
+  en_desktop_spider= fread("en_desktop_spider.csv")
+  en_mobile_web_all_agents= fread("en_mobile_web_all_agents.csv")
+  en_mobile_web_spider= fread("en_mobile_web_spider.csv")
+  #Spanish
+  es_all_access_all_agents= fread("es_all_access_all_agents.csv")
+  es_all_access_spider= fread("es_all_access_spider.csv")
+  es_desktop_all_agents= fread("es_desktop_all_agents.csv")
+  es_desktop_spider= fread("es_desktop_spider.csv")
+  es_mobile_web_all_agents= fread("es_mobile_web_all_agents.csv")
+  es_mobile_web_spider= fread("es_mobile_web_spider.csv")
+  # French
+  fr_all_access_all_agents= fread("fr_all_access_all_agents.csv")
+  fr_all_access_spider= fread("fr_all_access_spider.csv")
+  fr_desktop_all_agents= fread("fr_desktop_all_agents.csv")
+  fr_desktop_spider= fread("fr_desktop_spider.csv")
+  fr_mobile_web_all_agents= fread("fr_mobile_web_all_agents.csv")
+  fr_mobile_web_spider= fread("fr_mobile_web_spider.csv")
+  #Russian
+  ru_all_access_all_agents= fread("ru_all_access_all_agents.csv")
+  ru_all_access_spider= fread("ru_all_access_spider.csv")
+  ru_desktop_all_agents= fread("ru_desktop_all_agents.csv")
+  ru_desktop_spider= fread("ru_desktop_spider.csv")
+  ru_mobile_web_all_agents= fread("ru_mobile_web_all_agents.csv")
+  ru_mobile_web_spider= fread("ru_mobile_web_spider.csv")
+  #Chinese
+  zh_all_access_all_agents= fread("zh_all_access_all_agents.csv")
+  zh_all_access_spider= fread("zh_all_access_spider.csv")
+  zh_desktop_all_agents= fread("zh_desktop_all_agents.csv")
+  zh_desktop_spider= fread("zh_desktop_spider.csv")
+  zh_mobile_web_all_agents= fread("zh_mobile_web_all_agents.csv")
+  zh_mobile_web_spider= fread("zh_mobile_web_spider.csv")
+  
+  ########################################################################
+  #Converting 'Date' as Date and 0 as integer
+  
+  #German
+  de_all_access_all_agents$Date = as.Date(de_all_access_all_agents$Date)
+  de_all_access_all_agents$`0` = as.integer(de_all_access_all_agents$`0`)
+  
+  de_desktop_all_agents$Date = as.Date(de_desktop_all_agents$Date)
+  de_desktop_all_agents$`0` = as.integer(de_desktop_all_agents$`0`)
+  
+  de_all_access_spider$Date = as.Date(de_all_access_spider$Date)
+  de_all_access_spider$`0` = as.integer(de_all_access_spider$`0`)
+  
+  de_desktop_spider$Date = as.Date(de_desktop_spider$Date)
+  de_desktop_spider$`0` = as.integer(de_desktop_spider$`0`)
+  
+  de_mobile_web_all_agents$Date = as.Date(de_mobile_web_all_agents$Date)
+  de_mobile_web_all_agents$`0` = as.integer(de_mobile_web_all_agents$`0`)
+  
+  de_mobile_web_spider$Date = as.Date(de_mobile_web_spider$Date)
+  de_mobile_web_spider$`0` = as.integer(de_mobile_web_spider$`0`)
+  
+  # English
+  en_all_access_all_agents$Date = as.Date(en_all_access_all_agents$Date)
+  en_all_access_all_agents$`0` = as.integer(en_all_access_all_agents$`0`)
+  
+  en_all_access_spider$Date = as.Date(en_all_access_spider$Date)
+  en_all_access_spider$`0` = as.integer(en_all_access_spider$`0`)
+  
+  en_desktop_all_agents$Date = as.Date(en_desktop_all_agents$Date)
+  en_desktop_all_agents$`0` = as.integer(en_desktop_all_agents$`0`)
+  
+  en_desktop_spider$Date = as.Date(en_desktop_spider$Date)
+  en_desktop_spider$`0` = as.integer(en_desktop_spider$`0`)
+  
+  en_mobile_web_all_agents$Date = as.Date(en_mobile_web_all_agents$Date)
+  en_mobile_web_all_agents$`0` = as.integer(en_mobile_web_all_agents$`0`)
+  
+  en_mobile_web_spider$Date = as.Date(en_mobile_web_spider$Date)
+  en_mobile_web_spider$`0` = as.integer(en_mobile_web_spider$`0`)
+  
+  # Spanish
+  es_all_access_all_agents$Date = as.Date(es_all_access_all_agents$Date)
+  es_all_access_all_agents$`0` = as.integer(es_all_access_all_agents$`0`)
+  
+  es_all_access_spider$Date = as.Date(es_all_access_spider$Date)
+  es_all_access_spider$`0` = as.integer(es_all_access_spider$`0`)
+  
+  es_desktop_all_agents$Date = as.Date(es_desktop_all_agents$Date)
+  es_desktop_all_agents$`0` = as.integer(es_desktop_all_agents$`0`)
+  
+  es_desktop_spider$Date = as.Date(es_desktop_spider$Date)
+  es_desktop_spider$`0` = as.integer(es_desktop_spider$`0`)
+  
+  es_mobile_web_all_agents$Date = as.Date(es_mobile_web_all_agents$Date)
+  es_mobile_web_all_agents$`0` = as.integer(es_mobile_web_all_agents$`0`)
+  
+  es_mobile_web_spider$Date = as.Date(es_mobile_web_spider$Date)
+  es_mobile_web_spider$`0` = as.integer(es_mobile_web_spider$`0`)
+  
+  # French
+  fr_all_access_all_agents$Date = as.Date(fr_all_access_all_agents$Date)
+  fr_all_access_all_agents$`0` = as.integer(fr_all_access_all_agents$`0`)
+  
+  fr_all_access_spider$Date = as.Date(fr_all_access_spider$Date)
+  fr_all_access_spider$`0` = as.integer(fr_all_access_spider$`0`)
+  
+  fr_desktop_all_agents$Date = as.Date(fr_desktop_all_agents$Date)
+  fr_desktop_all_agents$`0` = as.integer(fr_desktop_all_agents$`0`)
+  
+  fr_desktop_spider$Date = as.Date(fr_desktop_spider$Date)
+  fr_desktop_spider$`0` = as.integer(fr_desktop_spider$`0`)
+  
+  fr_mobile_web_all_agents$Date = as.Date(fr_mobile_web_all_agents$Date)
+  fr_mobile_web_all_agents$`0` = as.integer(fr_mobile_web_all_agents$`0`)
+  
+  fr_mobile_web_spider$Date = as.Date(fr_mobile_web_spider$Date)
+  fr_mobile_web_spider$`0` = as.integer(fr_mobile_web_spider$`0`)
+  
+  # Russian
+  ru_all_access_all_agents$Date = as.Date(ru_all_access_all_agents$Date)
+  ru_all_access_all_agents$`0` = as.integer(ru_all_access_all_agents$`0`)
+  
+  ru_all_access_spider$Date = as.Date(ru_all_access_spider$Date)
+  ru_all_access_spider$`0` = as.integer(ru_all_access_spider$`0`)
+  
+  ru_desktop_all_agents$Date = as.Date(ru_desktop_all_agents$Date)
+  ru_desktop_all_agents$`0` = as.integer(ru_desktop_all_agents$`0`)
+  
+  ru_desktop_spider$Date = as.Date(ru_desktop_spider$Date)
+  ru_desktop_spider$`0` = as.integer(ru_desktop_spider$`0`)
+  
+  ru_mobile_web_all_agents$Date = as.Date(ru_mobile_web_all_agents$Date)
+  ru_mobile_web_all_agents$`0` = as.integer(ru_mobile_web_all_agents$`0`)
+  
+  ru_mobile_web_spider$Date = as.Date(ru_mobile_web_spider$Date)
+  ru_mobile_web_spider$`0` = as.integer(ru_mobile_web_spider$`0`)
+  
+  # Chinese
+  zh_all_access_all_agents$Date = as.Date(zh_all_access_all_agents$Date)
+  zh_all_access_all_agents$`0` = as.integer(zh_all_access_all_agents$`0`)
+  
+  zh_all_access_spider$Date = as.Date(zh_all_access_spider$Date)
+  zh_all_access_spider$`0` = as.integer(zh_all_access_spider$`0`)
+  
+  zh_desktop_all_agents$Date = as.Date(zh_desktop_all_agents$Date)
+  zh_desktop_all_agents$`0` = as.integer(zh_desktop_all_agents$`0`)
+  
+  zh_desktop_spider$Date = as.Date(zh_desktop_spider$Date)
+  zh_desktop_spider$`0` = as.integer(zh_desktop_spider$`0`)
+  
+  zh_mobile_web_all_agents$Date = as.Date(zh_mobile_web_all_agents$Date)
+  zh_mobile_web_all_agents$`0` = as.integer(zh_mobile_web_all_agents$`0`)
+  
+  zh_mobile_web_spider$Date = as.Date(zh_mobile_web_spider$Date)
+  zh_mobile_web_spider$`0` = as.integer(zh_mobile_web_spider$`0`)
+  
+  ##############################################################################
+  ################### Converting to time series ###############
+  
+  #German
+  series_de_all_access_all_agents = ts(de_desktop_all_agents$`0`, start = 1, frequency = 7)
+  series_de_all_access_spider = ts(de_all_access_spider$`0`, start = 1, frequency = 7)
+  series_de_desktop_all_agents = ts(de_desktop_all_agents$`0`, start = 1, frequency = 7)
+  series_de_desktop_spider = ts(de_desktop_spider$`0`, start = 1, frequency = 7)
+  series_de_mobile_web_all_agents = ts(de_mobile_web_all_agents$`0`, start = 1, frequency = 7)
+  series_de_mobile_web_spider = ts(de_mobile_web_spider$`0`, start = 1, frequency = 7)
+  
+  #English
+  series_en_all_access_all_agents = ts(en_all_access_all_agents$`0`, start = 1, frequency = 7)
+  series_en_all_access_spider = ts(en_all_access_spider$`0`, start = 1, frequency = 7)
+  series_en_desktop_all_agents = ts(en_desktop_all_agents$`0`, start = 1, frequency = 7)
+  series_en_desktop_spider = ts(en_desktop_spider$`0`, start = 1, frequency = 7)
+  series_en_mobile_web_all_agents = ts(en_mobile_web_all_agents$`0`, start = 1, frequency = 7)
+  series_en_mobile_web_spider = ts(en_mobile_web_spider$`0`, start = 1, frequency = 7)
+  
+  #Spanish
+  series_es_all_access_all_agents = ts(es_all_access_all_agents$`0`, start = 1, frequency = 7)
+  series_es_all_access_spider = ts(es_all_access_spider$`0`, start = 1, frequency = 7 )
+  series_es_desktop_all_agents = ts(es_desktop_all_agents$`0`, start = 1, frequency = 7)
+  series_es_desktop_spider = ts(es_desktop_spider$`0`, start = 1, frequency = 7)
+  series_es_mobile_web_all_agents = ts(es_mobile_web_all_agents$`0`, start = 1, frequency = 7)
+  series_es_mobile_web_spider = ts(es_mobile_web_spider$`0`, start = 1, frequency = 7)
+  
+  #French
+  series_fr_all_access_all_agents = ts(fr_all_access_all_agents$`0`, start = 1, frequency = 7)
+  series_fr_all_access_spider = ts(fr_all_access_spider$`0`, start = 1, frequency = 7)
+  series_fr_desktop_all_agents = ts(fr_desktop_all_agents$`0`, start = 1, frequency = 7)
+  series_fr_desktop_spider = ts(fr_desktop_spider$`0`, start = 1, frequency = 7)
+  series_fr_mobile_web_all_agents = ts(fr_mobile_web_all_agents$`0`, start = 1, frequency = 7)
+  series_fr_mobile_web_spider = ts(fr_mobile_web_spider$`0`, start = 1, frequency = 7)
+  
+  #Russian
+  series_ru_all_access_all_agents = ts(ru_all_access_all_agents$`0`, start = 1, frequency = 7)
+  series_ru_all_access_spider = ts(ru_all_access_spider$`0`, start = 1, frequency = 7)
+  series_ru_desktop_all_agents = ts(ru_desktop_all_agents$`0`, start = 1, frequency = 7)
+  series_ru_desktop_spider = ts(ru_desktop_spider$`0`, start = 1, frequency = 7)
+  series_ru_mobile_web_all_agents = ts(ru_mobile_web_all_agents$`0`, start = 1, frequency = 7)
+  series_ru_mobile_web_spider = ts(ru_mobile_web_spider$`0`, start = 1, frequency = 7)
+  
+  #Chinese
+  series_zh_all_access_all_agents = ts(zh_all_access_all_agents$`0`, start = 1, frequency = 7)
+  series_zh_all_access_spider = ts(zh_all_access_spider$`0`, start = 1, frequency = 7)
+  series_zh_desktop_all_agents = ts(zh_desktop_all_agents$`0`, start = 1, frequency = 7)
+  series_zh_desktop_spider = ts(zh_desktop_spider$`0`, start = 1, frequency = 7)
+  series_zh_mobile_web_all_agents = ts(zh_mobile_web_all_agents$`0`, start = 1, frequency = 7)
+  series_zh_mobile_web_all_agents = ts(zh_mobile_web_all_agents$`0`, start = 1, frequency = 7)
+  
+  ###########################################################################
+  #Autoplot
+
+  #German
+  plot_series_de_all_access_all_agents = autoplot(series_de_all_access_all_agents, colour = 'red') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_de_all_access_spider = autoplot(series_de_all_access_spider, colour = 'red') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_de_desktop_all_agents = autoplot(series_de_desktop_all_agents, colour = 'red') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_de_desktop_spider = autoplot(series_de_desktop_spider, colour = 'red') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_de_mobile_web_all_agents = autoplot(series_de_mobile_web_all_agents, colour = 'red') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_de_mobile_web_spider = autoplot(series_de_mobile_web_spider, colour = 'red') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  
+  #English
+  plot_series_en_all_access_all_agents = autoplot(series_en_all_access_all_agents, colour = 'blue') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_en_all_access_spider = autoplot(series_en_all_access_spider, colour = 'blue') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_en_desktop_all_agents = autoplot(series_en_desktop_all_agents, colour = 'blue') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_en_desktop_spider= autoplot(series_en_desktop_spider, colour = 'blue') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_en_mobile_web_all_agents= autoplot(series_en_mobile_web_all_agents, colour = 'blue') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_en_mobile_web_spider= autoplot(series_en_mobile_web_spider, colour = 'blue') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  
+  #Spanish
+  plot_series_es_all_access_all_agents= autoplot(series_es_all_access_all_agents, colour = 'orange') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_es_all_access_spider= autoplot(series_es_all_access_spider, colour = 'orange') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_es_desktop_all_agents= autoplot(series_es_desktop_all_agents, colour = 'orange') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_es_desktop_spider= autoplot(series_es_desktop_spider, colour = 'orange') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_es_mobile_web_all_agents= autoplot(series_es_mobile_web_all_agents, colour = 'orange') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_es_mobile_web_spider= autoplot(series_es_mobile_web_spider, colour = 'orange') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  
+  # French
+  plot_series_fr_all_access_all_agents= autoplot(series_fr_all_access_all_agents, colour = 'purple') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_fr_all_access_spider= autoplot(series_fr_all_access_spider, colour = 'purple') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_fr_desktop_all_agents= autoplot(series_fr_desktop_all_agents, colour = 'purple') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_fr_desktop_spider= autoplot(series_fr_desktop_spider, colour = 'purple') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_fr_mobile_web_all_agents= autoplot(series_fr_mobile_web_all_agents, colour = 'purple') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_fr_mobile_web_spider= autoplot(series_fr_mobile_web_spider, colour = 'purple') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  
+  # Russian
+  plot_series_ru_all_access_all_agents= autoplot(series_ru_all_access_all_agents, colour = 'brown') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_ru_all_access_spider= autoplot(series_ru_all_access_spider, colour = 'brown') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_ru_desktop_all_agents= autoplot(series_ru_desktop_all_agents, colour = 'brown') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_ru_desktop_spider= autoplot(series_ru_desktop_spider, colour = 'brown') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_ru_mobile_web_all_agents= autoplot(series_ru_mobile_web_all_agents, colour = 'brown') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_ru_mobile_web_spider= autoplot(series_ru_mobile_web_spider, colour = 'brown') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  
+  #Chinese
+  plot_series_zh_all_access_all_agents= autoplot(series_zh_all_access_all_agents, colour = 'darkgreen') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_zh_all_access_spider= autoplot(series_zh_all_access_spider, colour = 'darkgreen') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_zh_desktop_all_agents= autoplot(series_zh_desktop_all_agents, colour = 'darkgreen') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_zh_desktop_spider= autoplot(series_zh_desktop_spider, colour = 'darkgreen') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_zh_mobile_web_all_agents= autoplot(series_zh_mobile_web_all_agents, colour = 'darkgreen') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  plot_series_zh_mobile_web_all_agents= autoplot(series_zh_mobile_web_all_agents, colour = 'darkgreen') +ggtitle('Web Traffic Volume') + xlab('Time(in Weeks)') + ylab('Volume')
+  
+  
+  # ADF Testing to check stationarity
+  adf.test(series_en_desktop_spider , k = 10)
+  adf.test(series_en_mobile_web_all_agents , k = 10)
+  adf.test(series_en_mobile_web_spider , k = 10)
+  adf.test(series_es_all_access_all_agents , k = 10)
+  adf.test(series_es_all_access_spider , k = 10)
+  adf.test(series_es_desktop_all_agents , k = 10)
+  adf.test(series_es_desktop_spider , k = 10)
+  adf.test(series_es_mobile_web_all_agents , k = 10)
+  adf.test(series_es_mobile_web_spider , k = 10)
+  adf.test(series_fr_all_access_all_agents , k = 10)
+  adf.test(series_fr_all_access_spider , k = 10)
+  adf.test(series_fr_desktop_all_agents , k = 10)
+  adf.test(series_fr_desktop_spider , k = 10)
+  adf.test(series_fr_mobile_web_all_agents , k = 10)
+  adf.test(series_fr_mobile_web_spider , k = 10)
+  adf.test(series_ru_all_access_all_agents , k = 10)
+  adf.test(series_ru_all_access_spider , k = 10)
+  adf.test(series_ru_desktop_all_agents , k = 10)
+  adf.test(series_ru_desktop_spider , k = 10)
+  adf.test(series_ru_mobile_web_all_agents , k = 10)
+  adf.test(series_ru_mobile_web_spider , k = 10)
+  adf.test(series_zh_all_access_all_agents , k = 10)
+  adf.test(series_zh_all_access_spider , k = 10)
+  adf.test(series_zh_desktop_all_agents , k = 10)
+  adf.test(series_zh_desktop_spider , k = 10)
+  adf.test(series_zh_mobile_web_all_agents , k = 10)
+  adf.test(series_zh_mobile_web_all_agents , k = 10)
+  
+  #####################################################################
+  #AutoArima Models
+  
+  #German
+  model_series_de_all_access_all_agents  = auto.arima(series_de_all_access_all_agents )
+  model_series_de_all_access_spider  = auto.arima(series_de_all_access_spider )
+  model_series_de_desktop_all_agents  = auto.arima(series_de_desktop_all_agents )
+  model_series_de_desktop_spider  = auto.arima(series_de_desktop_spider )
+  model_series_de_mobile_web_all_agents  = auto.arima(series_de_mobile_web_all_agents )
+  model_series_de_mobile_web_spider  = auto.arima(series_de_mobile_web_spider )
+  
+  #English
+  model_series_en_all_access_all_agents  = auto.arima(series_en_all_access_all_agents )
+  model_series_en_all_access_spider  = auto.arima(series_en_all_access_spider )
+  model_series_en_desktop_all_agents  = auto.arima(series_en_desktop_all_agents )
+  model_series_en_desktop_spider  = auto.arima(series_en_desktop_spider )
+  model_series_en_mobile_web_all_agents  = auto.arima(series_en_mobile_web_all_agents )
+  model_series_en_mobile_web_spider  = auto.arima(series_en_mobile_web_spider )
+  
+  #Spanish
+  model_series_es_all_access_all_agents  = auto.arima(series_es_all_access_all_agents )
+  model_series_es_all_access_spider  = auto.arima(series_es_all_access_spider )
+  model_series_es_desktop_all_agents  = auto.arima(series_es_desktop_all_agents )
+  model_series_es_desktop_spider  = auto.arima(series_es_desktop_spider )
+  model_series_es_mobile_web_all_agents  = auto.arima(series_es_mobile_web_all_agents )
+  model_series_es_mobile_web_spider  = auto.arima(series_es_mobile_web_spider )
+  
+  #French
+  model_series_fr_all_access_all_agents  = auto.arima(series_fr_all_access_all_agents )
+  model_series_fr_all_access_spider  = auto.arima(series_fr_all_access_spider )
+  model_series_fr_desktop_all_agents  = auto.arima(series_fr_desktop_all_agents )
+  model_series_fr_desktop_spider  = auto.arima(series_fr_desktop_spider )
+  model_series_fr_mobile_web_all_agents  = auto.arima(series_fr_mobile_web_all_agents )
+  model_series_fr_mobile_web_spider  = auto.arima(series_fr_mobile_web_spider )
+  
+  #Russian
+  model_series_ru_all_access_all_agents  = auto.arima(series_ru_all_access_all_agents )
+  model_series_ru_all_access_spider  = auto.arima(series_ru_all_access_spider )
+  model_series_ru_desktop_all_agents  = auto.arima(series_ru_desktop_all_agents )
+  model_series_ru_desktop_spider  = auto.arima(series_ru_desktop_spider )
+  model_series_ru_mobile_web_all_agents  = auto.arima(series_ru_mobile_web_all_agents )
+  model_series_ru_mobile_web_spider  = auto.arima(series_ru_mobile_web_spider )
+  
+  #Chinese
+  model_series_zh_all_access_all_agents  = auto.arima(series_zh_all_access_all_agents )
+  model_series_zh_all_access_spider  = auto.arima(series_zh_all_access_spider )
+  model_series_zh_desktop_all_agents  = auto.arima(series_zh_desktop_all_agents )
+  model_series_zh_desktop_spider  = auto.arima(series_zh_desktop_spider )
+  model_series_zh_mobile_web_all_agents  = auto.arima(series_zh_mobile_web_all_agents )
+  model_series_zh_mobile_web_all_agents  = auto.arima(series_zh_mobile_web_all_agents )
+  
+  
+  #################################################################################
+  #### Forecast Using the built models
+  
+  
+  forecast_series_de_all_access_all_agents = forecast(series_de_all_access_all_agents  , h = 52)
+  forecast_series_de_all_access_spider = forecast(series_de_all_access_spider  , h = 52)
+  forecast_series_de_desktop_all_agents = forecast(series_de_desktop_all_agents  , h = 52)
+  forecast_series_de_desktop_spider = forecast(series_de_desktop_spider  , h = 52)
+  forecast_series_de_mobile_web_all_agents = forecast(series_de_mobile_web_all_agents  , h = 52)
+  
+  forecast_series_de_mobile_web_spider = forecast(series_de_mobile_web_spider  , h = 52)
+  forecast_series_en_all_access_all_agents = forecast(series_en_all_access_all_agents  , h = 52)
+  forecast_series_en_all_access_spider = forecast(series_en_all_access_spider  , h = 52)
+  forecast_series_en_desktop_all_agents = forecast(series_en_desktop_all_agents  , h = 52)
+  forecast_series_en_desktop_spider = forecast(series_en_desktop_spider  , h = 52)
+  forecast_series_en_mobile_web_all_agents = forecast(series_en_mobile_web_all_agents  , h = 52)
+  forecast_series_en_mobile_web_spider = forecast(series_en_mobile_web_spider  , h = 52)
+  
+  forecast_series_es_all_access_all_agents = forecast(series_es_all_access_all_agents  , h = 52)
+  forecast_series_es_all_access_spider = forecast(series_es_all_access_spider  , h = 52)
+  forecast_series_es_desktop_all_agents = forecast(series_es_desktop_all_agents  , h = 52)
+  forecast_series_es_desktop_spider = forecast(series_es_desktop_spider  , h = 52)
+  forecast_series_es_mobile_web_all_agents = forecast(series_es_mobile_web_all_agents  , h = 52)
+  forecast_series_es_mobile_web_spider = forecast(series_es_mobile_web_spider  , h = 52)
+  
+  forecast_series_fr_all_access_all_agents = forecast(series_fr_all_access_all_agents  , h = 52)
+  forecast_series_fr_all_access_spider = forecast(series_fr_all_access_spider  , h = 52)
+  forecast_series_fr_desktop_all_agents = forecast(series_fr_desktop_all_agents  , h = 52)
+  forecast_series_fr_desktop_spider = forecast(series_fr_desktop_spider  , h = 52)
+  forecast_series_fr_mobile_web_all_agents = forecast(series_fr_mobile_web_all_agents  , h = 52)
+  forecast_series_fr_mobile_web_spider = forecast(series_fr_mobile_web_spider  , h = 52)
+  
+  forecast_series_ru_all_access_all_agents = forecast(series_ru_all_access_all_agents  , h = 52)
+  forecast_series_ru_all_access_spider = forecast(series_ru_all_access_spider  , h = 52)
+  forecast_series_ru_desktop_all_agents = forecast(series_ru_desktop_all_agents  , h = 52)
+  forecast_series_ru_desktop_spider = forecast(series_ru_desktop_spider  , h = 52)
+  forecast_series_ru_mobile_web_all_agents = forecast(series_ru_mobile_web_all_agents  , h = 52)
+  forecast_series_ru_mobile_web_spider = forecast(series_ru_mobile_web_spider  , h = 52)
+  
+  forecast_series_zh_all_access_all_agents = forecast(series_zh_all_access_all_agents  , h = 52)
+  forecast_series_zh_all_access_spider = forecast(series_zh_all_access_spider  , h = 52)
+  forecast_series_zh_desktop_all_agents = forecast(series_zh_desktop_all_agents  , h = 52)
+  forecast_series_zh_desktop_spider = forecast(series_zh_desktop_spider  , h = 52)
+  forecast_series_zh_mobile_web_all_agents = forecast(series_zh_mobile_web_all_agents  , h = 52)
+  forecast_series_zh_mobile_web_all_agents = forecast(series_zh_mobile_web_all_agents  , h = 52)
+  
+
+  #######################################################################
+  #### Data Table of Estimates
+  df_forecast_series_de_all_access_all_agents  = as.data.table(forecast_series_de_all_access_all_agents )
+  df_forecast_series_de_all_access_spider  = as.data.table(forecast_series_de_all_access_spider )
+  df_forecast_series_de_desktop_all_agents  = as.data.table(forecast_series_de_desktop_all_agents )
+  df_forecast_series_de_desktop_spider  = as.data.table(forecast_series_de_desktop_spider )
+  df_forecast_series_de_mobile_web_all_agents  = as.data.table(forecast_series_de_mobile_web_all_agents )
+  df_forecast_series_de_mobile_web_spider  = as.data.table(forecast_series_de_mobile_web_spider )
+  df_forecast_series_en_all_access_all_agents  = as.data.table(forecast_series_en_all_access_all_agents )
+  df_forecast_series_en_all_access_spider  = as.data.table(forecast_series_en_all_access_spider )
+  df_forecast_series_en_desktop_all_agents  = as.data.table(forecast_series_en_desktop_all_agents )
+  df_forecast_series_en_desktop_spider  = as.data.table(forecast_series_en_desktop_spider )
+  df_forecast_series_en_mobile_web_all_agents  = as.data.table(forecast_series_en_mobile_web_all_agents )
+  df_forecast_series_en_mobile_web_spider  = as.data.table(forecast_series_en_mobile_web_spider )
+  df_forecast_series_es_all_access_all_agents  = as.data.table(forecast_series_es_all_access_all_agents )
+  df_forecast_series_es_all_access_spider  = as.data.table(forecast_series_es_all_access_spider )
+  df_forecast_series_es_desktop_all_agents  = as.data.table(forecast_series_es_desktop_all_agents )
+  df_forecast_series_es_desktop_spider  = as.data.table(forecast_series_es_desktop_spider )
+  df_forecast_series_es_mobile_web_all_agents  = as.data.table(forecast_series_es_mobile_web_all_agents )
+  df_forecast_series_es_mobile_web_spider  = as.data.table(forecast_series_es_mobile_web_spider )
+  df_forecast_series_fr_all_access_all_agents  = as.data.table(forecast_series_fr_all_access_all_agents )
+  df_forecast_series_fr_all_access_spider  = as.data.table(forecast_series_fr_all_access_spider )
+  df_forecast_series_fr_desktop_all_agents  = as.data.table(forecast_series_fr_desktop_all_agents )
+  df_forecast_series_fr_desktop_spider  = as.data.table(forecast_series_fr_desktop_spider )
+  df_forecast_series_fr_mobile_web_all_agents  = as.data.table(forecast_series_fr_mobile_web_all_agents )
+  df_forecast_series_fr_mobile_web_spider  = as.data.table(forecast_series_fr_mobile_web_spider )
+  df_forecast_series_ru_all_access_all_agents  = as.data.table(forecast_series_ru_all_access_all_agents )
+  df_forecast_series_ru_all_access_spider  = as.data.table(forecast_series_ru_all_access_spider )
+  df_forecast_series_ru_desktop_all_agents  = as.data.table(forecast_series_ru_desktop_all_agents )
+  df_forecast_series_ru_desktop_spider  = as.data.table(forecast_series_ru_desktop_spider )
+  df_forecast_series_ru_mobile_web_all_agents  = as.data.table(forecast_series_ru_mobile_web_all_agents )
+  df_forecast_series_ru_mobile_web_spider  = as.data.table(forecast_series_ru_mobile_web_spider )
+  df_forecast_series_zh_all_access_all_agents  = as.data.table(forecast_series_zh_all_access_all_agents )
+  df_forecast_series_zh_all_access_spider  = as.data.table(forecast_series_zh_all_access_spider )
+  df_forecast_series_zh_desktop_all_agents  = as.data.table(forecast_series_zh_desktop_all_agents )
+  df_forecast_series_zh_desktop_spider  = as.data.table(forecast_series_zh_desktop_spider )
+  df_forecast_series_zh_mobile_web_all_agents  = as.data.table(forecast_series_zh_mobile_web_all_agents )
+  df_forecast_series_zh_mobile_web_all_agents  = as.data.table(forecast_series_zh_mobile_web_all_agents )
+  
+  ##############################################################################################################
+  
+  # Forecast Plot
+  plot_forecast_series_de_all_access_all_agents =autoplot(forecast_series_de_all_access_all_agents, colour = 'red' )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_de_all_access_spider =autoplot(forecast_series_de_all_access_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_de_desktop_all_agents =autoplot(forecast_series_de_desktop_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_de_desktop_spider =autoplot(forecast_series_de_desktop_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_de_mobile_web_all_agents =autoplot(forecast_series_de_mobile_web_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_de_mobile_web_spider =autoplot(forecast_series_de_mobile_web_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  
+  plot_forecast_series_en_all_access_all_agents =autoplot(forecast_series_en_all_access_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_en_all_access_spider =autoplot(forecast_series_en_all_access_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_en_desktop_all_agents =autoplot(forecast_series_en_desktop_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_en_desktop_spider =autoplot(forecast_series_en_desktop_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_en_mobile_web_all_agents =autoplot(forecast_series_en_mobile_web_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_en_mobile_web_spider =autoplot(forecast_series_en_mobile_web_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  
+  plot_forecast_series_es_all_access_all_agents =autoplot(forecast_series_es_all_access_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_es_all_access_spider =autoplot(forecast_series_es_all_access_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_es_desktop_all_agents =autoplot(forecast_series_es_desktop_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_es_desktop_spider =autoplot(forecast_series_es_desktop_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_es_mobile_web_all_agents =autoplot(forecast_series_es_mobile_web_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_es_mobile_web_spider =autoplot(forecast_series_es_mobile_web_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  
+  plot_forecast_series_fr_all_access_all_agents =autoplot(forecast_series_fr_all_access_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_fr_all_access_spider =autoplot(forecast_series_fr_all_access_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_fr_desktop_all_agents =autoplot(forecast_series_fr_desktop_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_fr_desktop_spider =autoplot(forecast_series_fr_desktop_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_fr_mobile_web_all_agents =autoplot(forecast_series_fr_mobile_web_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_fr_mobile_web_spider =autoplot(forecast_series_fr_mobile_web_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  
+  plot_forecast_series_ru_all_access_all_agents =autoplot(forecast_series_ru_all_access_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_ru_all_access_spider =autoplot(forecast_series_ru_all_access_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_ru_desktop_all_agents =autoplot(forecast_series_ru_desktop_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_ru_desktop_spider =autoplot(forecast_series_ru_desktop_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_ru_mobile_web_all_agents =autoplot(forecast_series_ru_mobile_web_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_ru_mobile_web_spider =autoplot(forecast_series_ru_mobile_web_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  
+  plot_forecast_series_zh_all_access_all_agents = autoplot(forecast_series_zh_all_access_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_zh_all_access_spider =autoplot(forecast_series_zh_all_access_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_zh_desktop_all_agents =autoplot(forecast_series_zh_desktop_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_zh_desktop_spider =autoplot(forecast_series_zh_desktop_spider )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_zh_mobile_web_all_agents =autoplot(forecast_series_zh_mobile_web_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  plot_forecast_series_zh_mobile_web_all_agents =autoplot(forecast_series_zh_mobile_web_all_agents )+ggtitle('Forecast from ARIMA model') + xlab('Time(in Weeks)') + ylab('Web Traffic Volume')
+  print('Server One Time Code Executed')
+  
+  
+  #Rendering Plots
+  
+    output$timeplot <- renderPlot({
+      
+      #### Forecast = No
+      if(input$Language == 'German' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'No') {plot_series_de_all_access_all_agents}
+      else if(input$Language == 'English' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'No') {plot_series_en_all_access_all_agents}
+      else if(input$Language == 'Spanish' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'No') {plot_series_es_all_access_all_agents}
+      else if(input$Language == 'French' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'No') {plot_series_fr_all_access_all_agents}
+      else if(input$Language == 'Russian' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'No') {plot_series_ru_all_access_all_agents}
+      else if(input$Language == 'Chinese' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'No') {plot_series_zh_all_access_all_agents}
+      else if(input$Language == 'German' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'No') {plot_series_de_all_access_spider}
+      else if(input$Language == 'English' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'No') {plot_series_en_all_access_spider}
+      else if(input$Language == 'Spanish' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'No') {plot_series_es_all_access_spider}
+      else if(input$Language == 'French' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'No') {plot_series_fr_all_access_spider}
+      else if(input$Language == 'Russian' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'No') {plot_series_ru_all_access_spider}
+      else if(input$Language == 'Chinese' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'No') {plot_series_zh_all_access_spider}
+      else if(input$Language == 'German' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_de_mobile_web_all_agents}
+      else if(input$Language == 'English' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_en_mobile_web_all_agents}
+      else if(input$Language == 'Spanish' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_es_mobile_web_all_agents}
+      else if(input$Language == 'French' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_fr_mobile_web_all_agents}
+      else if(input$Language == 'Russian' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_ru_mobile_web_all_agents}
+      else if(input$Language == 'Chinese' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_zh_mobile_web_all_agents}
+      else if(input$Language == 'German' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_de_mobile_web_spider}
+      else if(input$Language == 'English' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_en_mobile_web_spider}
+      else if(input$Language == 'Spanish' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_es_mobile_web_spider}
+      else if(input$Language == 'French' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_fr_mobile_web_spider}
+      else if(input$Language == 'Russian' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_ru_mobile_web_spider}
+      else if(input$Language == 'Chinese' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'No') {plot_series_zh_mobile_web_spider}
+      else if(input$Language == 'German' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_de_desktop_all_agents}
+      else if(input$Language == 'English' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_en_desktop_all_agents}
+      else if(input$Language == 'Spanish' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_es_desktop_all_agents}
+      else if(input$Language == 'French' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_fr_desktop_all_agents}
+      else if(input$Language == 'Russian' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_ru_desktop_all_agents}
+      else if(input$Language == 'Chinese' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_zh_desktop_all_agents}
+      else if(input$Language == 'German' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_de_desktop_spider}
+      else if(input$Language == 'English' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_en_desktop_spider}
+      else if(input$Language == 'Spanish' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_es_desktop_spider}
+      else if(input$Language == 'French' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_fr_desktop_spider}
+      else if(input$Language == 'Russian' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_ru_desktop_spider}
+      else if(input$Language == 'Chinese' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'No') {plot_series_zh_desktop_spider}
+      
+      
+      ### Forecast = Yes
+      else if(input$Language == 'German' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_de_all_access_all_agents}
+      else if(input$Language == 'English' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_en_all_access_all_agents}
+      else if(input$Language == 'Spanish' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_es_all_access_all_agents}
+      else if(input$Language == 'French' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_fr_all_access_all_agents}
+      else if(input$Language == 'Russian' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_ru_all_access_all_agents}
+      else if(input$Language == 'Chinese' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_zh_all_access_all_agents}
+      else if(input$Language == 'German' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_de_all_access_actual}
+      else if(input$Language == 'English' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_en_all_access_actual}
+      else if(input$Language == 'Spanish' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_es_all_access_actual}
+      else if(input$Language == 'French' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_fr_all_access_actual}
+      else if(input$Language == 'Russian' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_ru_all_access_actual}
+      else if(input$Language == 'Chinese' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_zh_all_access_actual}
+      else if(input$Language == 'German' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_de_all_access_spider}
+      else if(input$Language == 'English' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_en_all_access_spider}
+      else if(input$Language == 'Spanish' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_es_all_access_spider}
+      else if(input$Language == 'French' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_fr_all_access_spider}
+      else if(input$Language == 'Russian' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_ru_all_access_spider}
+      else if(input$Language == 'Chinese' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {plot_forecast_series_zh_all_access_spider}
+      else if(input$Language == 'German' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_de_mobile_web_all_agents}
+      else if(input$Language == 'English' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_en_mobile_web_all_agents}
+      else if(input$Language == 'Spanish' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_es_mobile_web_all_agents}
+      else if(input$Language == 'French' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_fr_mobile_web_all_agents}
+      else if(input$Language == 'Russian' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_ru_mobile_web_all_agents}
+      else if(input$Language == 'Chinese' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_zh_mobile_web_all_agents}
+      else if(input$Language == 'German' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_de_mobile_web_actual}
+      else if(input$Language == 'English' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_en_mobile_web_actual}
+      else if(input$Language == 'Spanish' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_es_mobile_web_actual}
+      else if(input$Language == 'French' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_fr_mobile_web_actual}
+      else if(input$Language == 'Russian' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_ru_mobile_web_actual}
+      else if(input$Language == 'Chinese' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_zh_mobile_web_actual}
+      else if(input$Language == 'German' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_de_mobile_web_spider}
+      else if(input$Language == 'English' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_en_mobile_web_spider}
+      else if(input$Language == 'Spanish' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_es_mobile_web_spider}
+      else if(input$Language == 'French' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_fr_mobile_web_spider}
+      else if(input$Language == 'Russian' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_ru_mobile_web_spider}
+      else if(input$Language == 'Chinese' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {plot_forecast_series_zh_mobile_web_spider}
+      else if(input$Language == 'German' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_de_desktop_all_agents}
+      else if(input$Language == 'English' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_en_desktop_all_agents}
+      else if(input$Language == 'Spanish' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_es_desktop_all_agents}
+      else if(input$Language == 'French' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_fr_desktop_all_agents}
+      else if(input$Language == 'Russian' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_ru_desktop_all_agents}
+      else if(input$Language == 'Chinese' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_zh_desktop_all_agents}
+      else if(input$Language == 'German' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_de_desktop_actual}
+      else if(input$Language == 'English' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_en_desktop_actual}
+      else if(input$Language == 'Spanish' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_es_desktop_actual}
+      else if(input$Language == 'French' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_fr_desktop_actual}
+      else if(input$Language == 'Russian' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_ru_desktop_actual}
+      else if(input$Language == 'Chinese' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_zh_desktop_actual}
+      else if(input$Language == 'German' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_de_desktop_spider}
+      else if(input$Language == 'English' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_en_desktop_spider}
+      else if(input$Language == 'Spanish' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_es_desktop_spider}
+      else if(input$Language == 'French' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_fr_desktop_spider}
+      else if(input$Language == 'Russian' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_ru_desktop_spider}
+      else if(input$Language == 'Chinese' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {plot_forecast_series_zh_desktop_spider}
+    })
+
+    output$estimates <- renderDataTable({
+      if(input$Language == 'German' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_de_all_access_all_agents}
+      else if(input$Language == 'English' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_en_all_access_all_agents}
+      else if(input$Language == 'Spanish' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_es_all_access_all_agents}
+      else if(input$Language == 'French' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_fr_all_access_all_agents}
+      else if(input$Language == 'Russian' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_ru_all_access_all_agents}
+      else if(input$Language == 'Chinese' && input$Agent =='All' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_zh_all_access_all_agents}
+      else if(input$Language == 'German' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_de_all_access_actual}
+      else if(input$Language == 'English' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_en_all_access_actual}
+      else if(input$Language == 'Spanish' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_es_all_access_actual}
+      else if(input$Language == 'French' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_fr_all_access_actual}
+      else if(input$Language == 'Russian' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_ru_all_access_actual}
+      else if(input$Language == 'Chinese' && input$Agent =='Actual' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_zh_all_access_actual}
+      else if(input$Language == 'German' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_de_all_access_spider}
+      else if(input$Language == 'English' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_en_all_access_spider}
+      else if(input$Language == 'Spanish' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_es_all_access_spider}
+      else if(input$Language == 'French' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_fr_all_access_spider}
+      else if(input$Language == 'Russian' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_ru_all_access_spider}
+      else if(input$Language == 'Chinese' && input$Agent =='Spider' && input$Access == 'All'&& input$forecast == 'Yes') {df_forecast_series_zh_all_access_spider}
+      else if(input$Language == 'German' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_de_mobile_web_all_agents}
+      else if(input$Language == 'English' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_en_mobile_web_all_agents}
+      else if(input$Language == 'Spanish' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_es_mobile_web_all_agents}
+      else if(input$Language == 'French' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_fr_mobile_web_all_agents}
+      else if(input$Language == 'Russian' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_ru_mobile_web_all_agents}
+      else if(input$Language == 'Chinese' && input$Agent =='All' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_zh_mobile_web_all_agents}
+      else if(input$Language == 'German' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_de_mobile_web_actual}
+      else if(input$Language == 'English' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_en_mobile_web_actual}
+      else if(input$Language == 'Spanish' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_es_mobile_web_actual}
+      else if(input$Language == 'French' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_fr_mobile_web_actual}
+      else if(input$Language == 'Russian' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_ru_mobile_web_actual}
+      else if(input$Language == 'Chinese' && input$Agent =='Actual' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_zh_mobile_web_actual}
+      else if(input$Language == 'German' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_de_mobile_web_spider}
+      else if(input$Language == 'English' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_en_mobile_web_spider}
+      else if(input$Language == 'Spanish' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_es_mobile_web_spider}
+      else if(input$Language == 'French' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_fr_mobile_web_spider}
+      else if(input$Language == 'Russian' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_ru_mobile_web_spider}
+      else if(input$Language == 'Chinese' && input$Agent =='Spider' && input$Access == 'Mobile'&& input$forecast == 'Yes') {df_forecast_series_zh_mobile_web_spider}
+      else if(input$Language == 'German' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_de_desktop_all_agents}
+      else if(input$Language == 'English' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_en_desktop_all_agents}
+      else if(input$Language == 'Spanish' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_es_desktop_all_agents}
+      else if(input$Language == 'French' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_fr_desktop_all_agents}
+      else if(input$Language == 'Russian' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_ru_desktop_all_agents}
+      else if(input$Language == 'Chinese' && input$Agent =='All' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_zh_desktop_all_agents}
+      else if(input$Language == 'German' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_de_desktop_actual}
+      else if(input$Language == 'English' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_en_desktop_actual}
+      else if(input$Language == 'Spanish' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_es_desktop_actual}
+      else if(input$Language == 'French' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_fr_desktop_actual}
+      else if(input$Language == 'Russian' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_ru_desktop_actual}
+      else if(input$Language == 'Chinese' && input$Agent =='Actual' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_zh_desktop_actual}
+      else if(input$Language == 'German' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_de_desktop_spider}
+      else if(input$Language == 'English' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_en_desktop_spider}
+      else if(input$Language == 'Spanish' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_es_desktop_spider}
+      else if(input$Language == 'French' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_fr_desktop_spider}
+      else if(input$Language == 'Russian' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_ru_desktop_spider}
+      else if(input$Language == 'Chinese' && input$Agent =='Spider' && input$Access == 'Desktop'&& input$forecast == 'Yes') {df_forecast_series_zh_desktop_spider}
+      
+})
+    
+})
+
